@@ -29,7 +29,7 @@ class ImprovedGossibSub extends GossipSub {
     this.log('publish', topics, messages)
 
     topics = utils.ensureArray(topics)
-    messages = utils.ensureArray(messages)
+    messages = utils.ensureArray(messages).map(d => Buffer.from(d))
 
     const from = this.peerInfo.id.toB58String()
 
@@ -82,7 +82,7 @@ class ImprovedFloodSub extends FloodSub {
     log('publish', topics, messages)
 
     topics = ensureArray(topics)
-    messages = ensureArray(messages)
+    messages = ensureArray(messages).map(d => Buffer.from(d))
 
     const from = this.peerInfo.id.toB58String()
 
