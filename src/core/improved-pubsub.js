@@ -8,11 +8,11 @@ const ensureArray = utils.ensureArray;
 const { signMessage } = require('libp2p-pubsub/src/message/sign');
 
 class ImprovedGossibSub extends GossipSub {
-  _buildMessage (message) {
+  async _buildMessage (message) {
     return this._buildMessageByPeerId(this.peerId, message);
   }
 
-  _buildMessageByPeerId (peerId, message) {
+  async _buildMessageByPeerId (peerId, message) {
     const msg = utils.normalizeOutRpcMessage(message)
     if (this.peerId) {
       return signMessage(peerId, msg)
@@ -33,7 +33,7 @@ class ImprovedGossibSub extends GossipSub {
 
     const from = this.peerInfo.id.toB58String()
 
-    const buildMessage = (msg, cb) => {
+    const buildMessage = async (msg, cb) => {
       const seqno = utils.randomSeqno()
       const msgObj = {
         from: from,
@@ -44,10 +44,10 @@ class ImprovedGossibSub extends GossipSub {
       // put in seen cache
       this.seenCache.put(msgObj.seqno)
 
+      const res = await this._buildMessageByPeerId(peerId, msgObj);
       // Emit to self if I'm interested and emitSelf enabled
-      this._options.emitSelf && this._emitMessages(topics, [msgObj])
-
-      return this._buildMessageByPeerId(peerId, msgObj)
+      this._options.emitSelf && this._emitMessages(topics, [{ ...msgObj, key: peerId._pubKey.bytes, signature: res.signature }])
+      return res;
     }
     const msgObjects = await pMap(messages, buildMessage)
 
@@ -86,7 +86,7 @@ class ImprovedFloodSub extends FloodSub {
 
     const from = this.peerInfo.id.toB58String()
 
-    const buildMessage = (msg) => {
+    const buildMessage = async (msg) => {
       const seqno = utils.randomSeqno()
       this.seenCache.put(utils.msgId(from, seqno))
 
@@ -97,10 +97,10 @@ class ImprovedFloodSub extends FloodSub {
         topicIDs: topics
       }
 
+      const res = await this._buildMessageByPeerId(peerId, message);
       // Emit to self if I'm interested and it is enabled
-      this._options.emitSelf && this._emitMessages(topics, [message])
-
-      return this._buildMessageByPeerId(peerId, message)
+      this._options.emitSelf && this._emitMessages(topics, [{ ...message, key: peerId._pubKey.bytes, signature: res.signature }])
+      return res;
     }
 
     const msgObjects = await pMap(messages, buildMessage)
