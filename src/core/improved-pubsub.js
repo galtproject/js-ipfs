@@ -55,6 +55,58 @@ class ImprovedGossibSub extends GossipSub {
     this._publish(utils.normalizeOutRpcMessages(msgObjects))
   }
 
+  _publish (messages) {
+    messages.forEach((msgObj) => {
+      this.messageCache.put(msgObj)
+      // @type Set<string>
+      const tosend = new Set()
+      msgObj.topicIDs.forEach((topic) => {
+        const peersInTopic = this.topics.get(topic)
+        if (!peersInTopic) {
+          return
+        }
+
+        // floodsub peers
+        peersInTopic.forEach((peer) => {
+          if (peer.info.protocols.has(constants.FloodSubID)) {
+            tosend.add(peer)
+          }
+        })
+
+        // Gossipsub peers handling
+        let meshPeers = this.mesh.get(topic)
+        if (!meshPeers) {
+          // We are not in the mesh for topic, use fanout peers
+          meshPeers = this.fanout.get(topic)
+          if (!meshPeers) {
+            // If we are not in the fanout, then pick any peers in topic
+            const peers = this._getPeers(topic, constants.GossipSubD)
+
+            if (peers.size > 0) {
+              meshPeers = peers
+              this.fanout.set(topic, peers)
+            } else {
+              meshPeers = []
+            }
+          }
+          // Store the latest publishing time
+          this.lastpub.set(topic, this._now())
+        }
+
+        meshPeers.forEach((peer) => {
+          tosend.add(peer)
+        })
+      })
+      // Publish messages to peers
+      tosend.forEach((peer) => {
+        // if (peer.info.id.toB58String() === msgObj.from) {
+        //   return
+        // }
+        this._sendRpc(peer, { msgs: [msgObj] })
+      })
+    })
+  }
+
   async publish(topics, messages) {
     return this.publishByPeerId(this.peerId, topics, messages);
   }
