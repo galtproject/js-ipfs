@@ -7,6 +7,8 @@ const ensureArray = utils.ensureArray;
 // const utils = require('libp2p-pubsub/src/utils')
 const { signMessage } = require('libp2p-pubsub/src/message/sign');
 
+const constants = require('libp2p-gossipsub/src/constants')
+
 class ImprovedGossibSub extends GossipSub {
   async _buildMessage (message) {
     return this._buildMessageByPeerId(this.peerId, message);
