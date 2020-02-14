@@ -180,6 +180,7 @@ function createApi ({
       subscribe: pubsubNotEnabled,
       unsubscribe: pubsubNotEnabled,
       publish: pubsubNotEnabled,
+      publishByPeerId: pubsubNotEnabled,
       ls: pubsubNotEnabled,
       peers: pubsubNotEnabled
     }

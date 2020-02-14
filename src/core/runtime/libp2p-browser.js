@@ -5,7 +5,7 @@ const WebRTCStar = require('libp2p-webrtc-star')
 const Multiplex = require('libp2p-mplex')
 const SECIO = require('libp2p-secio')
 const KadDHT = require('libp2p-kad-dht')
-const GossipSub = require('libp2p-gossipsub')
+const {GossipSub} = require('../improved-pubsub');
 const ipnsUtils = require('../ipns/routing/utils')
 
 module.exports = () => {
