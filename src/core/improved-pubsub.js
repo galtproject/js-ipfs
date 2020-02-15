@@ -7,7 +7,7 @@ const ensureArray = utils.ensureArray;
 // const utils = require('libp2p-pubsub/src/utils')
 const { signMessage } = require('libp2p-pubsub/src/message/sign');
 
-const constants = require('libp2p-gossipsub/src/constants')
+const SignPrefix = Buffer.from('libp2p-pubsub:')
 
 class ImprovedGossibSub extends GossipSub {
   async _buildMessage (message) {
@@ -57,56 +57,19 @@ class ImprovedGossibSub extends GossipSub {
     this._publish(utils.normalizeOutRpcMessages(msgObjects))
   }
 
-  _publish (messages) {
-    messages.forEach((msgObj) => {
-      this.messageCache.put(msgObj)
-      // @type Set<string>
-      const tosend = new Set()
-      msgObj.topicIDs.forEach((topic) => {
-        const peersInTopic = this.topics.get(topic)
-        if (!peersInTopic) {
-          return
-        }
+  async validate (message) { // eslint-disable-line require-await
+    // If strict signing is on and we have no signature, abort
+    if (this.strictSigning && !message.signature) {
+      this.log('Signing required and no signature was present, dropping message:', message)
+      return false
+    }
 
-        // floodsub peers
-        peersInTopic.forEach((peer) => {
-          if (peer.info.protocols.has(constants.FloodSubID)) {
-            tosend.add(peer)
-          }
-        })
-
-        // Gossipsub peers handling
-        let meshPeers = this.mesh.get(topic)
-        if (!meshPeers) {
-          // We are not in the mesh for topic, use fanout peers
-          meshPeers = this.fanout.get(topic)
-          if (!meshPeers) {
-            // If we are not in the fanout, then pick any peers in topic
-            const peers = this._getPeers(topic, constants.GossipSubD)
-
-            if (peers.size > 0) {
-              meshPeers = peers
-              this.fanout.set(topic, peers)
-            } else {
-              meshPeers = []
-            }
-          }
-          // Store the latest publishing time
-          this.lastpub.set(topic, this._now())
-        }
-
-        meshPeers.forEach((peer) => {
-          tosend.add(peer)
-        })
-      })
-      // Publish messages to peers
-      tosend.forEach((peer) => {
-        // if (peer.info.id.toB58String() === msgObj.from) {
-        //   return
-        // }
-        this._sendRpc(peer, { msgs: [msgObj] })
-      })
-    })
+    // Check the message signature if present
+    if (message.signature) {
+      return verifySignature(message)
+    } else {
+      return true
+    }
   }
 
   async publish(topics, messages) {
@@ -165,6 +128,43 @@ class ImprovedFloodSub extends FloodSub {
 
   async publish(topics, messages) {
     return this.publishByPeerId(this.peerId, topics, messages);
+  }
+}
+
+async function verifySignature (message) {
+  // Get message sans the signature
+  const baseMessage = { ...message }
+  delete baseMessage.signature
+  delete baseMessage.key
+  const bytes = Buffer.concat([
+    SignPrefix,
+    Message.encode(baseMessage)
+  ])
+
+  // Get the public key
+  const pubKey = await messagePublicKey(message)
+
+  // verify the base message
+  return pubKey.verify(bytes, message.signature)
+}
+
+async function messagePublicKey (message) {
+  if (message.key) {
+    const peerId = await PeerId.createFromPubKey(message.key)
+    return peerId.pubKey;
+    // the key belongs to the sender, return the key
+    // if (peerId.isEqual(message.from)) return peerId.pubKey
+    // We couldn't validate pubkey is from the originator, error
+    // throw new Error('Public Key does not match the originator')
+  } else {
+    // should be available in the from property of the message (peer id)
+    const from = PeerId.createFromBytes(message.from)
+
+    if (from.pubKey) {
+      return from.pubKey
+    } else {
+      throw new Error('Could not get the public key from the originator id')
+    }
   }
 }
 
