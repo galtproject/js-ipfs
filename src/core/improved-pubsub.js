@@ -6,6 +6,7 @@ const { utils } = require('libp2p-pubsub');
 const ensureArray = utils.ensureArray;
 // const utils = require('libp2p-pubsub/src/utils')
 const { signMessage } = require('libp2p-pubsub/src/message/sign');
+const { Message } = require('libp2p-pubsub/src/message/index');
 
 const SignPrefix = Buffer.from('libp2p-pubsub:')
 
