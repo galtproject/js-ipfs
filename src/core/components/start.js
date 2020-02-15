@@ -189,6 +189,7 @@ function createApi ({
     //TODO: find the better way to use keyLookup in geesome-libs
     _peerInfo: peerInfo,
     _options: constructorOptions,
+    _ipns: ipns,
     add,
     bitswap: {
       stat: Components.bitswap.stat({ bitswap }),
