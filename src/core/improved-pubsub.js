@@ -1,6 +1,7 @@
 const GossipSub = require('libp2p-gossipsub');
 const FloodSub = require('libp2p-floodsub');
 const pMap = require('p-map')
+const PeerId = require('peer-id')
 
 const { utils } = require('libp2p-pubsub');
 const ensureArray = utils.ensureArray;
