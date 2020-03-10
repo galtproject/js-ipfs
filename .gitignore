@@ -37,7 +37,7 @@ node_modules
 .idea
 
 lib
-dist
+#dist
 test/fixtures/go-ipfs-repo/LOCK
 test/fixtures/go-ipfs-repo/LOG
 test/fixtures/go-ipfs-repo/LOG.old
