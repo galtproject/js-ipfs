@@ -7,7 +7,7 @@ const $msgs = document.querySelector('#msgs')
 const $addrs = document.querySelector('#addrs')
 const $peers = document.querySelector('#peers')
 
-const NAMESPACE = `ipfs-quick-msg`
+const NAMESPACE = 'ipfs-quick-msg'
 
 const mkRoomName = (name) => {
   return `${NAMESPACE}-${name}`
@@ -32,7 +32,7 @@ module.exports = (ipfs, peersSet) => {
     // send and receive messages
     room.on('message', (message) => {
       console.log('got message from ' + message.from + ': ' + message.data.toString())
-      const node = document.createElement(`li`)
+      const node = document.createElement('li')
       node.innerText = `${message.from.substr(-4)}: ${message.data.toString()}`
       $msgs.appendChild(node)
     })

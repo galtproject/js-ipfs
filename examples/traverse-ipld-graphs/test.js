@@ -3,7 +3,7 @@
 const path = require('path')
 const {
   waitForOutput
-} = require('../utils')
+} = require('test-ipfs-example/utils')
 
 async function runTest () {
   console.info('Testing put.js')

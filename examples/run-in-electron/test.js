@@ -2,7 +2,7 @@
 
 const {
   waitForOutput
-} = require('../utils')
+} = require('test-ipfs-example/utils')
 
 async function runTest () {
   await waitForOutput('protocolVersion', 'npm', ['run', 'start'], {

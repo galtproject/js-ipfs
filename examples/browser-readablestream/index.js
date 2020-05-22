@@ -2,7 +2,7 @@
 
 /* eslint-env browser */
 
-const Ipfs = require('../../')
+const Ipfs = require('ipfs')
 const VideoStream = require('videostream')
 const toStream = require('it-to-stream')
 const {
