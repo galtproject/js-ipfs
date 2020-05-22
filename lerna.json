@@ -1,0 +1,24 @@
+{
+  "lerna": "3.20.2",
+  "packages": [
+    "packages/*",
+    "examples/*"
+  ],
+  "version": "independent",
+  "command": {
+    "bootstrap": {
+      "hoist": true,
+      "nohoist": [
+        "ipfs-css",
+        "tachyons"
+      ]
+    },
+    "run": {
+      "stream": true
+    },
+    "publish": {
+      "message": "chore: publish",
+      "createRelease": "github"
+    }
+  }
+}

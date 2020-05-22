@@ -1,14 +1,14 @@
 'use strict'
 
-const IPFS = require('../../')
+const IPFS = require('ipfs')
 
 const execa = require('execa')
 const os = require('os')
 const path = require('path')
-const hat = require('hat')
+const { nanoid } = require('nanoid')
 const {
   waitForOutput
-} = require('../utils')
+} = require('test-ipfs-example/utils')
 
 async function testCli () {
   await Promise.all([
@@ -18,14 +18,14 @@ async function testCli () {
 }
 
 async function startCliNode () {
-  const repoDir = path.join(os.tmpdir(), `repo-${hat()}`)
+  const repoDir = path.join(os.tmpdir(), `repo-${nanoid()}`)
   const opts = {
     env: {
       ...process.env,
       IPFS_PATH: repoDir
     }
   }
-  const ipfs = path.resolve(__dirname, '../../src/cli/bin.js')
+  const ipfs = require.resolve('ipfs/src/cli/bin.js')
 
   await execa(ipfs, ['init'], opts)
   await execa(ipfs, ['config', 'Addresses.Swarm', '--json', JSON.stringify([`/ip4/0.0.0.0/tcp/0`, `/ip4/127.0.0.1/tcp/0/ws`])], opts)
@@ -43,7 +43,7 @@ async function testProgramatically () {
 }
 
 async function startProgramaticNode () {
-  const repoDir = path.join(os.tmpdir(), `repo-${hat()}`)
+  const repoDir = path.join(os.tmpdir(), `repo-${nanoid()}`)
   const node = await IPFS.create({
     repo: repoDir,
     config: {

@@ -4,11 +4,11 @@ const fs = require('fs-extra')
 const path = require('path')
 const { createFactory } = require('ipfsd-ctl')
 const df = createFactory({
-  ipfsModule: require('../../src'),
+  ipfsModule: require('ipfs'),
   ipfsHttpModule: require('ipfs-http-client')
 }, {
   js: {
-    ipfsBin: path.resolve(`${__dirname}/../../src/cli/bin.js`)
+    ipfsBin: require.resolve('ipfs/src/cli/bin.js')
   }
 })
 

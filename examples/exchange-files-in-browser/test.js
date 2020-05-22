@@ -1,5 +1,6 @@
 'use strict'
 
+const http = require('http')
 const fs = require('fs-extra')
 const path = require('path')
 const os = require('os')
@@ -7,21 +8,23 @@ const execa = require('execa')
 const delay = require('delay')
 const { createFactory } = require('ipfsd-ctl')
 const df = createFactory({
-  ipfsModule: require('../../src'),
+  ipfsModule: require('ipfs'),
   ipfsHttpModule: require('ipfs-http-client')
 }, {
   js: {
-    ipfsBin: path.resolve(`${__dirname}/../../src/cli/bin.js`)
+    ipfsBin: require.resolve('ipfs/src/cli/bin.js')
   }
 })
 const {
   startServer
-} = require('../utils')
+} = require('test-ipfs-example/utils')
 const pkg = require('./package.json')
 const webRTCStarSigServer = require('libp2p-webrtc-star/src/sig-server')
 
+const FILE_CONTENT = 'A file with some content'
+
 async function testUI (env) {
-  const proc = execa('nightwatch', [path.join(__dirname, 'test.js')], {
+  const proc = execa(require.resolve('test-ipfs-example/node_modules/.bin/nightwatch'), [ '--config', require.resolve('test-ipfs-example/nightwatch.conf.js'),  path.join(__dirname, 'test.js') ], {
     cwd: path.resolve(__dirname, '../'),
     env: {
       ...process.env,
@@ -58,7 +61,7 @@ async function runTest () {
 
   let cid
 
-  for await (const imported of relay.api.add('A file with some content')) {
+  for await (const imported of relay.api.add(FILE_CONTENT)) {
     cid = imported.cid
   }
 
@@ -75,7 +78,7 @@ async function runTest () {
       throw new Error(`Could not find web socket address in ${id.addresses}`)
     }
 
-    const workspaceName = `test-${Date.now()}`
+    const workspaceName = `test-${Math.random()}`
     const peerA = path.join(os.tmpdir(), `test-${Date.now()}-a.txt`)
     const peerB = path.join(os.tmpdir(), `test-${Date.now()}-b.txt`)
 
@@ -185,6 +188,20 @@ module.exports[pkg.name] = function (browser) {
 
   // but should both see the added file
   browser.expect.element('#file-history').text.to.contain(process.env.IPFS_CID)
+
+  if (!process.env.IPFS_ADD_FILE) {
+    // download the file from the other browser
+    browser
+      .getAttribute(`a[download=${process.env.IPFS_CID}]`, 'href', ({ value: url }) => {
+        browser.executeAsync(function (url, done) {
+          fetch(url)
+            .then(res => res.text())
+            .then(done, done)
+        }, [ url ], ({ value: contents }) => {
+          browser.expect(contents.toString('utf8')).to.equal(FILE_CONTENT)
+        })
+      })
+  }
 
   browser.end()
 }

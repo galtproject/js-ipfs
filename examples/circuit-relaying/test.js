@@ -7,16 +7,16 @@ const execa = require('execa')
 const delay = require('delay')
 const { createFactory } = require('ipfsd-ctl')
 const df = createFactory({
-  ipfsModule: require('../../src'),
+  ipfsModule: require('ipfs'),
   ipfsHttpModule: require('ipfs-http-client')
 })
 const {
   startServer
-} = require('../utils')
+} = require('test-ipfs-example/utils')
 const pkg = require('./package.json')
 
 async function testUI (url, relay, localPeerIdFile, remotePeerIdFile) {
-  const proc = execa('nightwatch', [path.join(__dirname, 'test.js')], {
+  const proc = execa(require.resolve('test-ipfs-example/node_modules/.bin/nightwatch'), ['--config', require.resolve('test-ipfs-example/nightwatch.conf.js'), path.join(__dirname, 'test.js')], {
     cwd: path.resolve(__dirname, '../'),
     env: {
       ...process.env,
@@ -101,20 +101,20 @@ module.exports[pkg.name] = function (browser) {
   // exchange peer info
   browser.getText('#addrs', (result) => {
     localPeerId = result.value.trim()
-    console.info('got local peer id', localPeerId)
+    console.info('got local peer id', localPeerId) // eslint-disable-line no-console
   })
     .perform(async (browser, done) => {
-      console.info('writing local peer id')
+      console.info('writing local peer id') // eslint-disable-line no-console
       await fs.writeFile(process.env.IPFS_LOCAL_PEER_ID_FILE, localPeerId)
 
-      console.info('reading remote peer id')
+      console.info('reading remote peer id') // eslint-disable-line no-console
       for (let i = 0; i < 100; i++) {
         try {
           remotePeerId = await fs.readFile(process.env.IPFS_REMOTE_PEER_ID_FILE, {
             encoding: 'utf8'
           })
 
-          console.info('got remote peer id', remotePeerId)
+          console.info('got remote peer id', remotePeerId) // eslint-disable-line no-console
           done()
 
           break
@@ -125,7 +125,7 @@ module.exports[pkg.name] = function (browser) {
         await delay(1000)
       }
 
-      console.info('connecting to remote peer', remotePeerId)
+      console.info('connecting to remote peer', remotePeerId) // eslint-disable-line no-console
 
       browser
         .clearValue('#peer')

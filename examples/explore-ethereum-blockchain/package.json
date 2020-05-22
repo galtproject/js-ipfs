@@ -1,0 +1,16 @@
+{
+  "name": "example-explore-ethereum-blockchain",
+  "description": "Exploring the ethereum blockchain with ipld",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "test-ipfs-example"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "ipfs": "^0.44.0",
+    "ipfs-http-client": "^44.0.3",
+    "test-ipfs-example": "^2.0.1"
+  }
+}

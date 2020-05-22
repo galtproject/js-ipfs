@@ -101,6 +101,19 @@ Here's what we are going to be doing, today:
 
 Let's go.
 
+## Before you start
+
+First clone this repo, install dependencies in the project root and build the project.
+
+```console
+$ git clone https://github.com/ipfs/js-ipfs.git
+$ cd js-ipfs
+$ npm install
+$ npm run build
+```
+
+## Running the example
+
 ### 1. Set up
 
 You'll need to have an implementation of IPFS running on your machine. Currently, this means either go-ipfs or js-ipfs.
@@ -247,13 +260,9 @@ Look out for an address similar to `/ip4/127.0.0.1/tcp/4003/ws/ipfs/Qm...`. Note
 
 ### 2. Configure and run the bundled example
 
-Now that we have ipfs installed and initialized, let's set up the included example. This is a standard npm package, so the usual `npm install` should get us going. Let's `cd` into the `examples/circuit-relaying` directory and run:
+Now that we have ipfs installed and initialized, let's set up the included example. This is a standard npm package, so the usual `npm install` should get us going. Let's `cd` into the `examples/circuit-relaying` directory.
 
-```sh
-npm install
-```
-
-After it finishes, we should be able to run the project with `npm start` and get output similar to:
+We should be able to run the project with `npm start` and get output similar to:
 
 ```sh
 npm start
