@@ -1,5 +1,5 @@
 {
-  "name": "ipfs-message-port-client",
+  "name": "@galtproject/ipfs-message-port-client",
   "version": "0.0.1",
   "description": "IPFS client library for accessing IPFS node over message port",
   "keywords": [

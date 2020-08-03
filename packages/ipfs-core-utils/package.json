@@ -1,5 +1,5 @@
 {
-  "name": "ipfs-core-utils",
+  "name": "@galtproject/ipfs-core-utils",
   "version": "0.3.0",
   "description": "Package to share code between ipfs and ipfs-http-client",
   "main": "src/index.js",

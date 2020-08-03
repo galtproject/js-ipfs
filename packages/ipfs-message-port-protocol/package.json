@@ -1,5 +1,5 @@
 {
-  "name": "ipfs-message-port-protocol",
+  "name": "@galtproject/ipfs-message-port-protocol",
   "version": "0.0.1",
   "description": "IPFS client/server protocol over message port",
   "keywords": [
