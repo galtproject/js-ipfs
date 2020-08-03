@@ -41,7 +41,6 @@
     "type": "git",
     "url": "git+https://github.com/ipfs/js-ipfs.git"
   },
-  "private": true,
   "contributors": [
     "David Dias <daviddias.p@gmail.com>",
     "Alan Shaw <alan.shaw@protocol.ai>",
