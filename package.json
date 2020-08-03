@@ -1,5 +1,5 @@
 {
-  "name": "js-ipfs",
+  "name": "@galtproject/js-ipfs",
   "version": "1.0.0",
   "description": "JavaScript implementation of the IPFS specification",
   "main": "packages/ipfs/src/core/index.js",
