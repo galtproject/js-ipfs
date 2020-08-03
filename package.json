@@ -2,7 +2,7 @@
   "name": "@galtproject/js-ipfs",
   "version": "1.0.0",
   "description": "JavaScript implementation of the IPFS specification",
-  "main": "packages/ipfs/src/core/index.js",
+  "main": "packages/ipfs/dist/index.min.js",
   "scripts": {
     "postinstall": "lerna bootstrap",
     "reset": "lerna run clean && rm -rf packages/*/node_modules node_modules",
