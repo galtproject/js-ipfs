@@ -1,15 +1,19 @@
 'use strict'
 
+const log = require('debug')('ipfs:components:start')
 const Bitswap = require('ipfs-bitswap')
 const multiaddr = require('multiaddr')
 const get = require('dlv')
 const defer = require('p-defer')
+const errCode = require('err-code')
 const IPNS = require('../ipns')
 const routingConfig = require('../ipns/routing/config')
 const { AlreadyInitializedError, NotEnabledError } = require('../errors')
 const Components = require('./')
 const createMfsPreload = require('../mfs-preload')
 const { withTimeoutOption } = require('../utils')
+
+const WEBSOCKET_STAR_PROTO_CODE = 479
 
 module.exports = ({
   apiManager,
@@ -19,13 +23,15 @@ module.exports = ({
   initOptions,
   ipld,
   keychain,
-  peerInfo,
+  peerId,
   pinManager,
   preload,
   print,
   repo
 }) => withTimeoutOption(async function start () {
   const startPromise = defer()
+  startPromise.promise.catch((err) => log(err))
+
   const { cancel } = apiManager.update({ start: () => startPromise.promise })
 
   try {
@@ -34,38 +40,47 @@ module.exports = ({
       await repo.open()
     }
 
-    const config = await repo.config.get()
+    const config = await repo.config.getAll()
+    const addrs = []
 
     if (config.Addresses && config.Addresses.Swarm) {
       config.Addresses.Swarm.forEach(addr => {
         let ma = multiaddr(addr)
 
+        // Temporary error for users migrating using websocket-star multiaddrs for listenning on libp2p
+        // websocket-star support was removed from ipfs and libp2p
+        if (ma.protoCodes().includes(WEBSOCKET_STAR_PROTO_CODE)) {
+          throw errCode(new Error('websocket-star swarm addresses are not supported. See https://github.com/ipfs/js-ipfs/issues/2779'), 'ERR_WEBSOCKET_STAR_SWARM_ADDR_NOT_SUPPORTED')
+        }
+
         // multiaddrs that go via a signalling server or other intermediary (e.g. stardust,
         // webrtc-star) can have the intermediary's peer ID in the address, so append our
         // peer ID to the end of it
         const maId = ma.getPeerId()
-        if (maId && maId !== peerInfo.id.toB58String()) {
-          ma = ma.encapsulate(`/p2p/${peerInfo.id.toB58String()}`)
+        if (maId && maId !== peerId.toB58String()) {
+          ma = ma.encapsulate(`/p2p/${peerId.toB58String()}`)
         }
 
-        peerInfo.multiaddrs.add(ma)
+        addrs.push(ma)
       })
     }
 
     const libp2p = Components.libp2p({
       options: constructorOptions,
       repo,
-      peerInfo,
-      print,
+      peerId: peerId,
+      multiaddrs: addrs,
       config
     })
 
+    libp2p.keychain && await libp2p.loadKeychain()
+
     await libp2p.start()
 
-    peerInfo.multiaddrs.forEach(ma => print(`Swarm listening on ${ma}/p2p/${peerInfo.id.toB58String()}`))
+    libp2p.transportManager.getAddrs().forEach(ma => print(`Swarm listening on ${ma}/p2p/${peerId.toB58String()}`))
 
-    const ipnsRouting = routingConfig({ libp2p, repo, peerInfo, options: constructorOptions })
-    const ipns = new IPNS(ipnsRouting, repo.datastore, peerInfo, keychain, { pass: initOptions.pass })
+    const ipnsRouting = routingConfig({ libp2p, repo, peerId, options: constructorOptions })
+    const ipns = new IPNS(ipnsRouting, repo.datastore, peerId, keychain, { pass: initOptions.pass })
     const bitswap = new Bitswap(libp2p, repo.blocks, { statsEnabled: true })
 
     await bitswap.start()
@@ -119,7 +134,7 @@ module.exports = ({
       keychain,
       libp2p,
       mfsPreload,
-      peerInfo,
+      peerId,
       pin,
       pinManager,
       preload,
@@ -154,7 +169,7 @@ function createApi ({
   keychain,
   libp2p,
   mfsPreload,
-  peerInfo,
+  peerId,
   pin,
   pinManager,
   preload,
@@ -176,20 +191,24 @@ function createApi ({
     stat: Components.object.stat({ ipld, preload })
   }
 
-  const add = Components.add({ block, preload, pin, gcLock, options: constructorOptions })
+  const addAll = Components.addAll({ block, preload, pin, gcLock, options: constructorOptions })
   const isOnline = Components.isOnline({ libp2p })
 
   const dhtNotEnabled = async () => { // eslint-disable-line require-await
     throw new NotEnabledError('dht not enabled')
   }
 
+  const dhtNotEnabledIterator = async function * () { // eslint-disable-line require-await,require-yield
+    throw new NotEnabledError('dht not enabled')
+  }
+
   const dht = get(libp2p, '_config.dht.enabled', false) ? Components.dht({ libp2p, repo }) : {
     get: dhtNotEnabled,
     put: dhtNotEnabled,
-    findProvs: dhtNotEnabled,
+    findProvs: dhtNotEnabledIterator,
     findPeer: dhtNotEnabled,
-    provide: dhtNotEnabled,
-    query: dhtNotEnabled
+    provide: dhtNotEnabledIterator,
+    query: dhtNotEnabledIterator
   }
 
   const dns = Components.dns()
@@ -199,8 +218,8 @@ function createApi ({
       state: Components.name.pubsub.state({ ipns, options: constructorOptions }),
       subs: Components.name.pubsub.subs({ ipns, options: constructorOptions })
     },
-    publish: Components.name.publish({ ipns, dag, peerInfo, isOnline, keychain, options: constructorOptions }),
-    resolve: Components.name.resolve({ dns, ipns, peerInfo, isOnline, options: constructorOptions })
+    publish: Components.name.publish({ ipns, dag, peerId, isOnline, keychain, options: constructorOptions }),
+    resolve: Components.name.resolve({ dns, ipns, peerId, isOnline, options: constructorOptions })
   }
   const resolve = Components.resolve({ name, ipld })
   const refs = Components.refs({ ipld, resolve, preload })
@@ -226,16 +245,20 @@ function createApi ({
     _peerInfo: peerInfo,
     _options: constructorOptions,
     _ipns: ipns,
-    add,
+    add: Components.add({ addAll }),
+    addAll,
     bitswap: {
       stat: Components.bitswap.stat({ bitswap }),
       unwant: Components.bitswap.unwant({ bitswap }),
-      wantlist: Components.bitswap.wantlist({ bitswap })
+      wantlist: Components.bitswap.wantlist({ bitswap }),
+      wantlistForPeer: Components.bitswap.wantlistForPeer({ bitswap })
     },
     block,
     bootstrap: {
       add: Components.bootstrap.add({ repo }),
+      clear: Components.bootstrap.clear({ repo }),
       list: Components.bootstrap.list({ repo }),
+      reset: Components.bootstrap.reset({ repo }),
       rm: Components.bootstrap.rm({ repo })
     },
     cat: Components.cat({ ipld, preload }),
@@ -245,7 +268,7 @@ function createApi ({
     dns,
     files,
     get: Components.get({ ipld, preload }),
-    id: Components.id({ peerInfo, libp2p }),
+    id: Components.id({ peerId, libp2p }),
     init: async () => { throw new AlreadyInitializedError() }, // eslint-disable-line require-await
     isOnline,
     key: {
@@ -293,7 +316,7 @@ function createApi ({
       keychain,
       libp2p,
       mfsPreload,
-      peerInfo,
+      peerId,
       preload,
       print,
       repo
@@ -302,7 +325,7 @@ function createApi ({
       addrs: Components.swarm.addrs({ libp2p }),
       connect: Components.swarm.connect({ libp2p }),
       disconnect: Components.swarm.disconnect({ libp2p }),
-      localAddrs: Components.swarm.localAddrs({ peerInfo }),
+      localAddrs: Components.swarm.localAddrs({ multiaddrs: libp2p.multiaddrs }),
       peers: Components.swarm.peers({ libp2p })
     },
     version: Components.version({ repo })

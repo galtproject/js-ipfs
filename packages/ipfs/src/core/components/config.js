@@ -6,7 +6,14 @@ const log = require('debug')('ipfs:core:config')
 
 module.exports = ({ repo }) => {
   return {
-    get: withTimeoutOption(repo.config.get),
+    getAll: withTimeoutOption(repo.config.getAll),
+    get: withTimeoutOption((key, options) => {
+      if (!key) {
+        return Promise.reject(new Error('key argument is required'))
+      }
+
+      return repo.config.get(key, options)
+    }),
     set: withTimeoutOption(repo.config.set),
     replace: withTimeoutOption(repo.config.replace),
     profiles: {
@@ -80,6 +87,7 @@ const profiles = {
       config.Addresses.API = defaultConfig.Addresses.API ? '/ip4/127.0.0.1/tcp/0' : ''
       config.Addresses.Gateway = defaultConfig.Addresses.Gateway ? '/ip4/127.0.0.1/tcp/0' : ''
       config.Addresses.Swarm = defaultConfig.Addresses.Swarm.length ? ['/ip4/127.0.0.1/tcp/0'] : []
+      config.Addresses.Delegates = []
       config.Bootstrap = []
       config.Discovery.MDNS.Enabled = false
       config.Discovery.webRTCStar.Enabled = false
@@ -95,6 +103,7 @@ const profiles = {
       config.Addresses.API = defaultConfig.Addresses.API
       config.Addresses.Gateway = defaultConfig.Addresses.Gateway
       config.Addresses.Swarm = defaultConfig.Addresses.Swarm
+      config.Addresses.Delegates = defaultConfig.Addresses.Delegates
       config.Bootstrap = defaultConfig.Bootstrap
       config.Discovery.MDNS.Enabled = defaultConfig.Discovery.MDNS.Enabled
       config.Discovery.webRTCStar.Enabled = defaultConfig.Discovery.webRTCStar.Enabled

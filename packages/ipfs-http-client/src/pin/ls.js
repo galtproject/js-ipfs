@@ -5,34 +5,24 @@ const configure = require('../lib/configure')
 const toUrlSearchParams = require('../lib/to-url-search-params')
 
 module.exports = configure(api => {
-  return async function * ls (path, options = {}) {
-    if (path && (path.type || path.timeout)) {
-      options = path || {}
-      path = []
+  return async function * ls (options = {}) {
+    if (options.paths) {
+      options.paths = Array.isArray(options.paths) ? options.paths : [options.paths]
     }
-
-    path = Array.isArray(path) ? path : [path]
 
     const res = await api.post('pin/ls', {
       timeout: options.timeout,
       signal: options.signal,
       searchParams: toUrlSearchParams({
-        arg: path.map(p => `${p}`),
         ...options,
+        arg: (options.paths || []).map(path => `${path}`),
         stream: true
       }),
       headers: options.headers
     })
 
     for await (const pin of res.ndjson()) {
-      if (pin.Keys) { // non-streaming response
-        // eslint-disable-next-line guard-for-in
-        for (const key in pin.Keys) {
-          yield { cid: new CID(key), type: pin.Keys[key].Type }
-        }
-      } else {
-        yield { cid: new CID(pin.Cid), type: pin.Type }
-      }
+      yield { cid: new CID(pin.Cid), type: pin.Type }
     }
   }
 })

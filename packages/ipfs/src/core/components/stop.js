@@ -17,7 +17,7 @@ module.exports = ({
   keychain,
   libp2p,
   mfsPreload,
-  peerInfo,
+  peerId,
   pinManager,
   preload,
   print,
@@ -38,9 +38,6 @@ module.exports = ({
       repo.close()
     ])
 
-    // Clear our addresses so we can start clean
-    peerInfo.multiaddrs.clear()
-
     const api = createApi({
       apiManager,
       constructorOptions,
@@ -49,7 +46,7 @@ module.exports = ({
       initOptions,
       ipld,
       keychain,
-      peerInfo,
+      peerId,
       pinManager,
       preload,
       print,
@@ -74,7 +71,7 @@ function createApi ({
   initOptions,
   ipld,
   keychain,
-  peerInfo,
+  peerId,
   pinManager,
   preload,
   print,
@@ -116,7 +113,7 @@ function createApi ({
     stat: Components.block.stat({ blockService, preload })
   }
 
-  const add = Components.add({ block, preload, pin, gcLock, options: constructorOptions })
+  const addAll = Components.addAll({ block, preload, pin, gcLock, options: constructorOptions })
   const resolve = Components.resolve({ ipld })
   const refs = Components.refs({ ipld, resolve, preload })
   refs.local = Components.refs.local({ repo })
@@ -126,16 +123,20 @@ function createApi ({
   }
 
   const api = {
-    add,
+    add: Components.add({ addAll }),
+    addAll,
     bitswap: {
       stat: notStarted,
       unwant: notStarted,
-      wantlist: notStarted
+      wantlist: notStarted,
+      wantlistForPeer: notStarted
     },
     block,
     bootstrap: {
       add: Components.bootstrap.add({ repo }),
+      clear: Components.bootstrap.clear({ repo }),
       list: Components.bootstrap.list({ repo }),
+      reset: Components.bootstrap.reset({ repo }),
       rm: Components.bootstrap.rm({ repo })
     },
     cat: Components.cat({ ipld, preload }),
@@ -144,7 +145,7 @@ function createApi ({
     dns: Components.dns(),
     files: Components.files({ ipld, block, blockService, repo, preload, options: constructorOptions }),
     get: Components.get({ ipld, preload }),
-    id: Components.id({ peerInfo }),
+    id: Components.id({ peerId }),
     init: async () => { // eslint-disable-line require-await
       throw new AlreadyInitializedError()
     },
@@ -176,7 +177,7 @@ function createApi ({
       initOptions,
       ipld,
       keychain,
-      peerInfo,
+      peerId,
       pinManager,
       preload,
       print,
@@ -192,7 +193,7 @@ function createApi ({
       addrs: notStarted,
       connect: notStarted,
       disconnect: notStarted,
-      localAddrs: Components.swarm.localAddrs({ peerInfo }),
+      localAddrs: Components.swarm.localAddrs({ multiaddrs: [] }),
       peers: notStarted
     },
     version: Components.version({ repo })
