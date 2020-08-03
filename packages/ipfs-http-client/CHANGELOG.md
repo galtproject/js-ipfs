@@ -3,6 +3,76 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 47.0.0 (2020-08-03)
+
+
+### Bug Fixes
+
+* add default args for ipfs.add ([#2950](https://github.com/ipfs/js-ipfs/issues/2950)) ([a01f5b6](https://github.com/ipfs/js-ipfs/commit/a01f5b63cd92d225b10eff497f79caf4baab1973))
+* dht.findPeer API endpoint returns ndjson ([#2965](https://github.com/ipfs/js-ipfs/issues/2965)) ([524ff32](https://github.com/ipfs/js-ipfs/commit/524ff32901e43460fe5b364bc4903ab249792874))
+* do not abort dht operation on error responses ([#3001](https://github.com/ipfs/js-ipfs/issues/3001)) ([a69f782](https://github.com/ipfs/js-ipfs/commit/a69f7828ccd77ab502689e45ed1112c9f804b386)), closes [#2991](https://github.com/ipfs/js-ipfs/issues/2991)
+* dont include util.textencoder in the browser ([#2919](https://github.com/ipfs/js-ipfs/issues/2919)) ([3207e3b](https://github.com/ipfs/js-ipfs/commit/3207e3b35c9c250332c03dd2a066e8ebcda35e43))
+* fix gc tests ([#3008](https://github.com/ipfs/js-ipfs/issues/3008)) ([9f7f03e](https://github.com/ipfs/js-ipfs/commit/9f7f03e1ea672834b7f984657c7d7d7c768bcd6c))
+* fixes browser script tag example ([#3034](https://github.com/ipfs/js-ipfs/issues/3034)) ([ee8b769](https://github.com/ipfs/js-ipfs/commit/ee8b769b96f7e3c8414bbf85853ab4e21e8fd11c)), closes [#3027](https://github.com/ipfs/js-ipfs/issues/3027)
+* make http api only accept POST requests ([#2977](https://github.com/ipfs/js-ipfs/issues/2977)) ([943d4a8](https://github.com/ipfs/js-ipfs/commit/943d4a8cf2d4c4ff5ecd4814c59cb0aae0cfa1fd))
+* optional arguments go in the options object ([#3118](https://github.com/ipfs/js-ipfs/issues/3118)) ([8cb8c73](https://github.com/ipfs/js-ipfs/commit/8cb8c73037e44894d756b70f344b3282463206f9))
+* pass headers to request ([#3018](https://github.com/ipfs/js-ipfs/issues/3018)) ([3ba00f8](https://github.com/ipfs/js-ipfs/commit/3ba00f8c6a8a057c5776d539a671a74d9565fb29)), closes [#3017](https://github.com/ipfs/js-ipfs/issues/3017)
+* pass timeout arg to server ([#2979](https://github.com/ipfs/js-ipfs/issues/2979)) ([049f085](https://github.com/ipfs/js-ipfs/commit/049f085fd206a1afb729fa825d8df38bf7aa8549))
+* remove node globals ([#2932](https://github.com/ipfs/js-ipfs/issues/2932)) ([d0d2f74](https://github.com/ipfs/js-ipfs/commit/d0d2f74cef4e439c6d2baadba1f1f9f52534fcba))
+* send blobs when running ipfs-http-client in the browser ([#3184](https://github.com/ipfs/js-ipfs/issues/3184)) ([6b24463](https://github.com/ipfs/js-ipfs/commit/6b24463431497bd13b579a730ad7063345729ad9)), closes [#3138](https://github.com/ipfs/js-ipfs/issues/3138)
+* small whitespace change ([0d4604d](https://github.com/ipfs/js-ipfs/commit/0d4604dde995edb69483c03622e38448d31eeb88))
+* still load dag-pb, dag-cbor and raw when specifying custom formats ([#3132](https://github.com/ipfs/js-ipfs/issues/3132)) ([a96e3bc](https://github.com/ipfs/js-ipfs/commit/a96e3bc9e3763004beafc24b98efa85ffa665622)), closes [#3129](https://github.com/ipfs/js-ipfs/issues/3129)
+* typeof bug when passing timeout to dag.get ([#3035](https://github.com/ipfs/js-ipfs/issues/3035)) ([026a542](https://github.com/ipfs/js-ipfs/commit/026a5423e00992968840c9236afe47bdab9ee834))
+
+
+### chore
+
+* move mfs and multipart files into core ([#2811](https://github.com/ipfs/js-ipfs/issues/2811)) ([82b9e08](https://github.com/ipfs/js-ipfs/commit/82b9e085330e6c6290e6f3dd29678247984ffdce))
+* update dep version and ignore interop test for raw leaves ([#2747](https://github.com/ipfs/js-ipfs/issues/2747)) ([6376cec](https://github.com/ipfs/js-ipfs/commit/6376cec2b4beccef4751c498088f600ec7788118))
+
+
+### Features
+
+* add config.getAll ([#3071](https://github.com/ipfs/js-ipfs/issues/3071)) ([16587f1](https://github.com/ipfs/js-ipfs/commit/16587f16e1b3ae525c099b1975748510638aceee))
+* add interface and http client versions to version output ([#3125](https://github.com/ipfs/js-ipfs/issues/3125)) ([65f8b23](https://github.com/ipfs/js-ipfs/commit/65f8b23f550f939e94aaf6939894a513519e6d68)), closes [#2878](https://github.com/ipfs/js-ipfs/issues/2878)
+* cancellable api calls ([#2993](https://github.com/ipfs/js-ipfs/issues/2993)) ([2b24f59](https://github.com/ipfs/js-ipfs/commit/2b24f590041a0df9da87b75ae2344232fe22fe3a)), closes [#3015](https://github.com/ipfs/js-ipfs/issues/3015)
+* remove ky from http-client and utils ([#2810](https://github.com/ipfs/js-ipfs/issues/2810)) ([9bc9625](https://github.com/ipfs/js-ipfs/commit/9bc96252686d0bbbfdb2a3300bb17b80eafdaf00)), closes [#2801](https://github.com/ipfs/js-ipfs/issues/2801)
+* share IPFS node between browser tabs ([#3081](https://github.com/ipfs/js-ipfs/issues/3081)) ([1b8b1b8](https://github.com/ipfs/js-ipfs/commit/1b8b1b822a252498889c54972a1f57e1fedc39d0)), closes [#3022](https://github.com/ipfs/js-ipfs/issues/3022)
+* store blocks by multihash instead of CID ([#3124](https://github.com/ipfs/js-ipfs/issues/3124)) ([03b17f5](https://github.com/ipfs/js-ipfs/commit/03b17f5e2d290e84aa0cb541079b79e468e7d1bd))
+* support loading arbitrary ipld formats in the http client ([#3073](https://github.com/ipfs/js-ipfs/issues/3073)) ([bd12773](https://github.com/ipfs/js-ipfs/commit/bd127730039ab79dd7ad22b31245939ee01a6514))
+* sync with go-ipfs 0.5 ([#3013](https://github.com/ipfs/js-ipfs/issues/3013)) ([0900bb9](https://github.com/ipfs/js-ipfs/commit/0900bb9b8123edb689a137a006c5507d8503f693))
+
+
+### BREAKING CHANGES
+
+* - not really
+* Where we used to accept all and any HTTP methods, now only POST is
+accepted.  The API client will now only send POST requests too.
+
+* test: add tests to make sure we are post-only
+
+* chore: upgrade ipfs-utils
+
+* fix: return 405 instead of 404 for bad methods
+
+* fix: reject browsers that do not send an origin
+
+Also fixes running interface tests over http in browsers against
+js-ipfs
+* When the path passed to `ipfs.files.stat(path)` was a hamt sharded dir, the resovled
+value returned by js-ipfs previously had a `type` property of with a value of
+`'hamt-sharded-directory'`.  To bring it in line with go-ipfs this value is now
+`'directory'`.
+* Files that fit into one block imported with either `--cid-version=1`
+or `--raw-leaves=true` previously returned a CID that resolved to
+a raw node (e.g. a buffer). Returned CIDs now resolve to a `dag-pb`
+node that contains a UnixFS entry. This is to allow setting metadata
+on small files with CIDv1.
+
+
+
+
+
 # 46.0.0 (2020-08-03)
 
 

@@ -2,7 +2,6 @@
 logs
 *.log
 npm-debug.log*
-package-lock.json
 yarn.lock
 .idea
 
@@ -20,7 +19,6 @@ node_modules
 #dist
 build
 bundle.js
-*.lock
 
 # Deployment files
 .npmrc
