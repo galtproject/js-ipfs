@@ -219,6 +219,7 @@ function createApi ({
       subs: Components.name.pubsub.subs({ ipns, options: constructorOptions })
     },
     publish: Components.name.publish({ ipns, dag, peerId, isOnline, keychain, options: constructorOptions }),
+    publishByKey: Components.name.publishByKey({ ipns, isOnline }),
     resolve: Components.name.resolve({ dns, ipns, peerId, isOnline, options: constructorOptions })
   }
   const resolve = Components.resolve({ name, ipld })
@@ -235,7 +236,7 @@ function createApi ({
       subscribe: pubsubNotEnabled,
       unsubscribe: pubsubNotEnabled,
       publish: pubsubNotEnabled,
-      publishByPeerId: pubsubNotEnabled,
+      publishByKey: pubsubNotEnabled,
       ls: pubsubNotEnabled,
       peers: pubsubNotEnabled
     }
