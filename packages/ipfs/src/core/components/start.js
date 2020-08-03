@@ -241,9 +241,6 @@ function createApi ({
     }
 
   const api = {
-    //TODO: find the better way to use keyLookup in geesome-libs
-    _peerInfo: peerInfo,
-    _options: constructorOptions,
     _ipns: ipns,
     add: Components.add({ addAll }),
     addAll,
