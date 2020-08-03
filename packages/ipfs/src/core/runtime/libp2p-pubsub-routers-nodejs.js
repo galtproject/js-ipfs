@@ -1,8 +1,6 @@
 'use strict'
 
-const {GossipSub, FloodSub} = require('../improved-pubsub');
-
 module.exports = {
-  gossipsub: GossipSub,
-  floodsub: FloodSub
-};
+  gossipsub: require('libp2p-gossipsub'),
+  floodsub: require('libp2p-floodsub')
+}

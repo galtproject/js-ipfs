@@ -49,6 +49,7 @@ exports.libp2p = require('./libp2p')
 exports.ls = require('./ls')
 exports.name = {
   publish: require('./name/publish'),
+  publishByKey: require('./name/publishByKey'),
   pubsub: {
     cancel: require('./name/pubsub/cancel'),
     state: require('./name/pubsub/state'),
