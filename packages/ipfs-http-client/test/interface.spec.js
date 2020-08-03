@@ -60,18 +60,7 @@ describe('interface-ipfs-core tests', () => {
     }]
   })
 
-  tests.bootstrap(commonFactory, {
-    skip: [{
-      name: 'should return a list containing the bootstrap peer when called with a valid arg (ip4)',
-      reason: 'TODO unskip when go-ipfs switches to p2p for libp2p keys'
-    }, {
-      name: 'should prevent duplicate inserts of bootstrap peers',
-      reason: 'TODO unskip when go-ipfs switches to p2p for libp2p keys'
-    }, {
-      name: 'should return a list containing the peer removed when called with a valid arg (ip4)',
-      reason: 'TODO unskip when go-ipfs switches to p2p for libp2p keys'
-    }]
-  })
+  tests.bootstrap(commonFactory)
 
   tests.config(commonFactory, {
     skip: [
@@ -477,7 +466,18 @@ describe('interface-ipfs-core tests', () => {
     ]
   })
 
-  tests.miscellaneous(commonFactory)
+  tests.miscellaneous(commonFactory, {
+    skip: [
+      {
+        name: 'should include the ipfs-http-client version',
+        reason: 'TODO not implemented in go-ipfs yet'
+      },
+      {
+        name: 'should include the interface-ipfs-core version',
+        reason: 'TODO not implemented in go-ipfs yet'
+      }
+    ]
+  })
 
   tests.name(factory(
     {

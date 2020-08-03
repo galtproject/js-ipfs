@@ -3,7 +3,7 @@
 const debug = require('debug')
 const log = debug('cli:config')
 log.error = debug('cli:config:error')
-const parseDuration = require('parse-duration')
+const parseDuration = require('parse-duration').default
 
 module.exports = {
   command: 'show',
@@ -18,7 +18,7 @@ module.exports = {
   },
 
   async handler ({ ctx: { ipfs, print }, timeout }) {
-    const config = await ipfs.config.get({
+    const config = await ipfs.config.getAll({
       timeout
     })
     print(JSON.stringify(config, null, 4))
