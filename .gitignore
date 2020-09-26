@@ -16,7 +16,7 @@ cache
 node_modules
 
 # Build artefacts
-#dist
+dist
 build
 bundle.js
 
