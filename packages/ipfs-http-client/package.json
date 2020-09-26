@@ -1,6 +1,6 @@
 {
   "name": "@galtproject/ipfs-http-client",
-  "version": "48.0.0",
+  "version": "48.0.1",
   "description": "A client library for the IPFS HTTP API",
   "keywords": [
     "ipfs"

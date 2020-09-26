@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [48.0.1](https://github.com/ipfs/js-ipfs/compare/@galtproject/ipfs-http-client@48.0.0...@galtproject/ipfs-http-client@48.0.1) (2020-09-26)
+
+**Note:** Version bump only for package @galtproject/ipfs-http-client
+
+
+
+
+
 # 48.0.0 (2020-08-03)
 
 

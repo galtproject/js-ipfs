@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.51.9](https://github.com/ipfs/js-ipfs/compare/@galtproject/js-ipfs@0.51.8...@galtproject/js-ipfs@0.51.9) (2020-09-26)
+
+**Note:** Version bump only for package @galtproject/js-ipfs
+
+
+
+
+
 ## [0.51.8](https://github.com/ipfs/js-ipfs/compare/@galtproject/js-ipfs@0.51.6...@galtproject/js-ipfs@0.51.8) (2020-08-03)
 
 **Note:** Version bump only for package @galtproject/js-ipfs
