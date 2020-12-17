@@ -17,6 +17,7 @@ module.exports = ({ network, config }) => {
     subscribe: isEnabled ? withTimeoutOption(subscribe) : notEnabled,
     unsubscribe: isEnabled ? withTimeoutOption(unsubscribe) : notEnabled,
     publish: isEnabled ? withTimeoutOption(publish) : notEnabled,
+    publishMessage: isEnabled ? withTimeoutOption(publishMessage) : notEnabled,
     ls: isEnabled ? withTimeoutOption(ls) : notEnabled,
     peers: isEnabled ? withTimeoutOption(peers) : notEnabled
   }
@@ -102,6 +103,10 @@ module.exports = ({ network, config }) => {
       throw errCode(new Error('argument "data" is required'), 'ERR_ARG_REQUIRED')
     }
     await libp2p.pubsub.publish(topic, data)
+  }
+  async function publishMessage (message, options) {
+    const { libp2p } = await network.use(options)
+    await libp2p.pubsub.publishMessage(message)
   }
   /**
    * Returns the list of subscriptions the peer is subscribed to.
