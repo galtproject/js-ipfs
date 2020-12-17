@@ -1,5 +1,5 @@
 {
-  "name": "ipfs-core",
+  "name": "@galtproject/browser-ipfs",
   "version": "0.3.1",
   "description": "JavaScript implementation of the IPFS specification",
   "keywords": [
