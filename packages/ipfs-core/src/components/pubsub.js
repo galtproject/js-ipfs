@@ -13,11 +13,8 @@ module.exports = ({ libp2p }) => {
       }
       await libp2p.pubsub.publish(topic, data)
     }),
-    publishMessage: withTimeoutOption(async (topic, message, options) => {
-      if (!data) {
-        throw errCode(new Error('argument "data" is required'), 'ERR_ARG_REQUIRED')
-      }
-      await libp2p.pubsub.publishMessage(topic, message)
+    publishMessage: withTimeoutOption(async (message, options) => {
+      await libp2p.pubsub.publishMessage(message)
     }),
     ls: withTimeoutOption((...args) => libp2p.pubsub.getTopics(...args)),
     peers: withTimeoutOption((...args) => libp2p.pubsub.getSubscribers(...args))
