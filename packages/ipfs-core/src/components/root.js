@@ -6,15 +6,16 @@ const createCatAPI = require('./cat')
 const createGetAPI = require('./get')
 const createLsAPI = require('./ls')
 
-class RootAPI {
+/**
+ * @typedef {AddAllContext & CatContext & GetContext & ListContext } Context
+ * @typedef {import('./add-all').Context} AddAllContext
+ * @typedef {import('./cat').Context} CatContext
+ * @typedef {import('./get').Context} GetContext
+ * @typedef {import('./ls').Context} ListContext
+ */
+class Root {
   /**
-   * @param {Object} config
-   * @param {Block} config.block
-   * @param {Pin} config.pin
-   * @param {GCLock} config.gcLock
-   * @param {Preload} config.preload
-   * @param {IPLD} config.ipld
-   * @param {ShardingOptions} [config.options]
+   * @param {Context} context
    */
   constructor ({ preload, gcLock, pin, block, ipld, options }) {
     const addAll = createAddAllAPI({
@@ -33,13 +34,4 @@ class RootAPI {
   }
 }
 
-module.exports = RootAPI
-
-/**
- * @typedef {import('.').Block} Block
- * @typedef {import('.').Pin} Pin
- * @typedef {import('.').GCLock} GCLock
- * @typedef {import('.').IPLD} IPLD
- * @typedef {import('.').Preload} Preload
- * @typedef {import('./add-all').ShardingOptions} ShardingOptions
- */
+module.exports = Root

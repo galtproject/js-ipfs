@@ -1,6 +1,6 @@
 'use strict'
 
-const parseDuration = require('parse-duration').default
+const { default: parseDuration } = require('parse-duration')
 
 module.exports = {
   command: 'id',
@@ -19,6 +19,12 @@ module.exports = {
     }
   },
 
+  /**
+   * @param {object} argv
+   * @param {import('../types').Context} argv.ctx
+   * @param {string} argv.format
+   * @param {number} argv.timeout
+   */
   async handler ({ ctx: { ipfs, print }, format, timeout }) {
     const id = await ipfs.id({
       timeout

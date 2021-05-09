@@ -5,8 +5,10 @@ module.exports = () => ({
     Swarm: [
     ],
     Announce: [],
+    NoAnnounce: [],
     API: '',
     Gateway: '',
+    RPC: '',
     Delegates: [
       '/dns4/node0.delegate.ipfs.io/tcp/443/https',
       '/dns4/node1.delegate.ipfs.io/tcp/443/https',
@@ -41,7 +43,8 @@ module.exports = () => ({
     ConnMgr: {
       LowWater: 200,
       HighWater: 500
-    }
+    },
+    DisableNatPortMap: true
   },
   Routing: {
     Type: 'none'

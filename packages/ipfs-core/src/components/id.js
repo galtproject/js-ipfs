@@ -1,30 +1,24 @@
 'use strict'
 
 const pkgversion = require('../../package.json').version
-const multiaddr = require('multiaddr')
+const { Multiaddr } = require('multiaddr')
 const withTimeoutOption = require('ipfs-core-utils/src/with-timeout-option')
 const uint8ArrayToString = require('uint8arrays/to-string')
 
 /**
  * @param {Object} config
- * @param {import('.').PeerId} config.peerId
- * @param {import('.').NetworkService} config.network
+ * @param {import('peer-id')} config.peerId
+ * @param {import('../types').NetworkService} config.network
  */
 module.exports = ({ peerId, network }) => {
   /**
-   * Returns the identity of the Peer
-   *
-   * @param {import('../utils').AbortOptions} [_options]
-   * @returns {Promise<ID>}
-   * @example
-   * ```js
-   * const identity = await ipfs.id()
-   * console.log(identity)
-   * ```
+   * @type {import('ipfs-core-types/src/root').API["id"]}
    */
-  async function id (_options) { // eslint-disable-line require-await
+  async function id (_options = {}) { // eslint-disable-line require-await
     const id = peerId.toB58String()
+    /** @type {Multiaddr[]} */
     let addresses = []
+    /** @type {string[]} */
     let protocols = []
 
     const net = network.try()
@@ -32,7 +26,7 @@ module.exports = ({ peerId, network }) => {
     if (net) {
       const { libp2p } = net
       // only available while the node is running
-      addresses = libp2p.transportManager.getAddrs()
+      addresses = libp2p.multiaddrs
       protocols = Array.from(libp2p.upgrader.protocols.keys())
     }
 
@@ -52,7 +46,7 @@ module.exports = ({ peerId, network }) => {
           return `${str}/p2p/${id}`
         })
         .sort()
-        .map(ma => multiaddr(ma)),
+        .map(ma => new Multiaddr(ma)),
       agentVersion: `js-ipfs/${pkgversion}`,
       protocolVersion: '9000',
       protocols: protocols.sort()
@@ -66,7 +60,7 @@ module.exports = ({ peerId, network }) => {
  * The Peer identity
  * @property {string} id - the Peer ID
  * @property {string} publicKey - the public key of the peer as a base64 encoded string
- * @property {import('multiaddr')[]} addresses - A list of multiaddrs this node is listening on
+ * @property {Multiaddr[]} addresses - A list of multiaddrs this node is listening on
  * @property {string} agentVersion - The agent version
  * @property {string} protocolVersion - The supported protocol version
  * @property {string[]} protocols - The supported protocols

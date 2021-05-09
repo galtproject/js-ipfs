@@ -5,10 +5,14 @@ const isIpfs = require('is-ipfs')
 const CID = require('cids')
 const Key = require('interface-datastore').Key
 const errCode = require('err-code')
-const toCidAndPath = require('ipfs-core-utils/src/to-cid-and-path')
 const withTimeoutOption = require('ipfs-core-utils/src/with-timeout-option')
 /** @type {typeof Object.assign} */
 const mergeOptions = require('merge-options')
+const resolve = require('./components/dag/resolve')
+
+/**
+ * @typedef {import('ipfs-core-types/src/utils').AbortOptions} AbortOptions
+ */
 
 exports.mergeOptions = mergeOptions
 
@@ -23,12 +27,12 @@ exports.MFS_MAX_LINKS = 174
  * Returns a well-formed ipfs Path.
  * The returned path will always be prefixed with /ipfs/ or /ipns/.
  *
- * @param  {string} pathStr - An ipfs-path, or ipns-path or a cid
+ * @param  {string | CID} pathStr - An ipfs-path, or ipns-path or a cid
  * @returns {string} - ipfs-path or ipns-path
  * @throws on an invalid @param pathStr
  */
 const normalizePath = (pathStr) => {
-  if (isIpfs.cid(pathStr)) {
+  if (isIpfs.cid(pathStr) || CID.isCID(pathStr)) {
     return `/ipfs/${new CID(pathStr)}`
   } else if (isIpfs.path(pathStr)) {
     return pathStr
@@ -38,6 +42,7 @@ const normalizePath = (pathStr) => {
 }
 
 // TODO: do we need both normalizePath and normalizeCidPath?
+// TODO: don't forget ipfs-core-utils/src/to-cid-and-path
 /**
  * @param {Uint8Array|CID|string} path
  * @returns {string}
@@ -68,42 +73,30 @@ const normalizeCidPath = (path) => {
  * - /ipfs/<base58 string>/link/to/pluto
  * - multihash Buffer
  *
- * @param {import('./components').DagReader} dag
+ * @param {import('ipld')} ipld
  * @param {CID | string} ipfsPath - A CID or IPFS path
  * @param {Object} [options] - Optional options passed directly to dag.resolve
  * @returns {Promise<CID>}
  */
-const resolvePath = async function (dag, ipfsPath, options = {}) {
-  if (isIpfs.cid(ipfsPath)) {
-    // @ts-ignore - CID|string seems to confuse typedef
-    return new CID(ipfsPath)
-  }
+const resolvePath = async function (ipld, ipfsPath, options = {}) {
+  const preload = () => {}
+  preload.stop = () => {}
+  preload.start = () => {}
 
-  const {
-    cid,
-    path
-  } = toCidAndPath(ipfsPath)
+  const { cid } = await resolve({ ipld, preload })(ipfsPath, { preload: false })
 
-  if (!path) {
-    return cid
-  }
-
-  const result = await dag.resolve(cid, {
-    ...options,
-    path
-  })
-
-  return result.cid
+  return cid
 }
 
 /**
- * @param {InputFile|UnixFSFile} file
+ * @typedef {import('ipfs-unixfs-exporter').UnixFSEntry} UnixFSEntry
+ *
+ * @param {UnixFSEntry} file
  * @param {Object} [options]
  * @param {boolean} [options.includeContent]
- * @returns {IPFSEntry}
  */
 const mapFile = (file, options = {}) => {
-  /** @type {IPFSEntry} */
+  /** @type {import('ipfs-core-types/src/root').IPFSEntry} */
   const output = {
     cid: file.cid,
     path: file.path,
@@ -113,110 +106,28 @@ const mapFile = (file, options = {}) => {
     type: 'file'
   }
 
-  if (file.unixfs) {
+  if (file.type === 'file' || file.type === 'directory') {
     // @ts-ignore - TS type can't be changed from File to Directory
-    output.type = file.unixfs.type === 'directory' ? 'dir' : 'file'
+    output.type = file.type === 'directory' ? 'dir' : 'file'
 
-    if (file.unixfs.type === 'file') {
+    if (file.type === 'file') {
       output.size = file.unixfs.fileSize()
 
       if (options.includeContent) {
+        // @ts-expect-error - content is readonly
         output.content = file.content()
       }
     }
 
     output.mode = file.unixfs.mode
-    output.mtime = file.unixfs.mtime
+
+    if (file.unixfs.mtime !== undefined) {
+      output.mtime = file.unixfs.mtime
+    }
   }
 
   return output
 }
-
-/**
- * @typedef {Object} File
- * @property {'file'} type
- * @property {CID} cid
- * @property {string} name
- * @property {string} path - File path
- * @property {AsyncIterable<Uint8Array>} [content] - File content
- * @property {number} [mode]
- * @property {MTime} [mtime]
- * @property {number} size
- * @property {number} depth
- *
- * @typedef {Object} Directory
- * @property {'dir'} type
- * @property {CID} cid
- * @property {string} name
- * @property {string} path - Directory path
- * @property {number} [mode]
- * @property {MTime} [mtime]
- * @property {number} size
- * @property {number} depth
- *
- * @typedef {File|Directory} IPFSEntry
- *
- * @typedef {Object} BaseFile
- * @property {CID} cid
- * @property {string} path
- * @property {string} name
- *
- * @typedef {Object} InputFileExt
- * @property {undefined} [unixfs]
- *
- * @typedef {BaseFile & InputFileExt} InputFile
- *
- * @typedef {Object} UnixFSeExt
- * @property {() => AsyncIterable<Uint8Array>} content
- * @property {UnixFS} unixfs
- *
- * @typedef {BaseFile & UnixFSeExt} UnixFSFile
- *
- *
- * @typedef {Object} UnixFS
- * @property {'directory'|'file'|'dir'} type
- * @property {() => number} fileSize
- * @property {() => AsyncIterable<Uint8Array>} content
- * @property {number} mode
- * @property {MTime} mtime
- *
- * @typedef {object} MTime
- * @property {number} secs - the number of seconds since (positive) or before
- * (negative) the Unix Epoch began
- * @property {number} [nsecs] - the number of nanoseconds since the last full
- * second.
- */
-
-/**
- * @template {any[]} ARGS
- * @template R
- * @typedef {(...args: ARGS) => R} Fn
- */
-
-/**
- * @typedef {object} AbortOptions
- * @property {number} [timeout] - A timeout in ms
- * @property {AbortSignal} [signal] - Can be used to cancel any long running requests started as a result of this call
- */
-
-/**
- * @typedef {Object} Mtime
- * @property {number} [secs]
- * @property {number} [nsecs]
- */
-
-/**
- * @typedef {[number, number]} Hrtime
- */
-
-/**
- * @typedef {Object} PreloadOptions
- * @property {boolean} [preload=true]
- */
-
-/**
- * @template {Record<string, any>} ExtraOptions
- */
 
 const withTimeout = withTimeoutOption(
   /**
