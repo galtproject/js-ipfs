@@ -19,6 +19,7 @@ node_modules
 dist
 build
 bundle.js
+.idea
 
 # Deployment files
 .npmrc
